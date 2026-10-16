@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { recordAttempt, sync } from "@/lib/progress";
 import { speak, useSpeech } from "@/lib/speech";
-import { WORDS, shuffle, type Word } from "@/lib/words";
+import { WORDS, shuffle, type Example, type Word } from "@/lib/words";
 
 type Phase = "cards" | "quiz" | "result";
 
@@ -82,6 +82,19 @@ function SpeakButton({ text, className = "" }: { text: string; className?: strin
   );
 }
 
+function ExampleBox({ ex, canSpeak }: { ex: Example; canSpeak: boolean }) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-3 text-left dark:bg-slate-900">
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="text-lg">{ex.text}</p>
+        <p className="text-xs text-slate-500">{ex.reading}</p>
+        <p className="text-sm">{ex.meaning}</p>
+      </div>
+      {canSpeak && <SpeakButton text={ex.reading} className="shrink-0" />}
+    </div>
+  );
+}
+
 function Cards({ words, voice, onDone }: { words: Word[]; voice: Voice; onDone: () => void }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState(false);
@@ -116,6 +129,11 @@ function Cards({ words, voice, onDone }: { words: Word[]; voice: Voice; onDone: 
             <span className="text-sm text-slate-400">탭해서 뜻 보기</span>
           )}
         </button>
+        {open && w.example && (
+          <div className="mt-3">
+            <ExampleBox ex={w.example} canSpeak={voice.canSpeak} />
+          </div>
+        )}
         {voice.canSpeak && <SpeakButton text={w.reading} className="absolute right-3 top-3" />}
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -186,6 +204,7 @@ function Quiz({ words, voice, onFinish }: { words: Word[]; voice: Voice; onFinis
           <p className={`text-center font-semibold ${picked === w.id ? "text-emerald-600" : "text-rose-600"}`}>
             {picked === w.id ? "정답!" : `오답 — 정답: ${w.meaning}`}
           </p>
+          {w.example && <ExampleBox ex={w.example} canSpeak={voice.canSpeak} />}
           <button className="btn-primary w-full" onClick={next}>
             {i === words.length - 1 ? "결과 보기" : "다음 문제"}
           </button>
