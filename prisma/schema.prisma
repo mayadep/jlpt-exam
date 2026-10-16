@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 정답/오답 한 번 한 번의 기록. id는 기기에서 만든 uuid라 같은 기록을 두 번 보내도 한 번만 저장돼요.
+model Attempt {
+  id      String   @id
+  userId  String   @default("me") // 로그인을 붙일 때 사용할 자리
+  wordId  String
+  correct Boolean
+  at      DateTime
+
+  @@index([userId, wordId, at])
+}
