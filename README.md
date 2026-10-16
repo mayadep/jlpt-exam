@@ -11,8 +11,8 @@
 
 ```bash
 npm install
-cp .env.example .env   # DATABASE_URL 입력
-npx prisma db push
+neon deploy            # Neon 브랜치 적용 + .env.local에 DATABASE_URL 받기
+npm run db:push
 npm run dev
 ```
 

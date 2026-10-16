@@ -4,7 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED") // Neon 풀러를 거치지 않는 연결 (db push용)
 }
 
 // 정답/오답 한 번 한 번의 기록. id는 기기에서 만든 uuid라 같은 기록을 두 번 보내도 한 번만 저장돼요.
