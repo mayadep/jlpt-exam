@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { accuracy, reviewList, useStats } from "@/lib/progress";
-import { SECTION_COUNT, SECTION_SIZE, WORDS, sectionWords } from "@/lib/words";
+import { useEffect, useState } from "react";
+import { GroupCard } from "@/components/GroupCard";
+import { reviewList, useStats } from "@/lib/progress";
+import { CATEGORIES, SECTION_COUNT, SECTION_SIZE, WORDS, categoryWords, sectionWords } from "@/lib/words";
+
+type View = "section" | "category";
+const VIEW_KEY = "jw.homeView";
 
 export default function Home() {
   const { stats } = useStats();
@@ -10,12 +15,30 @@ export default function Home() {
   const all = Object.values(stats);
   const total = all.reduce((n, s) => n + s.total, 0);
   const wrong = all.reduce((n, s) => n + s.wrong, 0);
+  const [view, setView] = useState<View>("section");
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(VIEW_KEY) === "category") setView("category");
+    } catch {
+      // 저장소를 못 쓰면 구간별로 보여줘요
+    }
+  }, []);
+
+  function choose(v: View) {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      // 기억 못 해도 괜찮아요
+    }
+  }
 
   return (
     <main className="space-y-5">
       <header>
         <h1 className="text-2xl font-bold">일본어 단어장</h1>
-        <p className="text-sm text-slate-500">JLPT N5 · 단어 {WORDS.length}개 · {SECTION_SIZE}개씩 {SECTION_COUNT}구간</p>
+        <p className="text-sm text-slate-500">JLPT N5 · 단어 {WORDS.length}개 · {SECTION_SIZE}개씩 {SECTION_COUNT}구간 · 주제 {CATEGORIES.length}개</p>
       </header>
 
       <section className="card grid grid-cols-3 divide-x divide-slate-100 p-4 text-center dark:divide-slate-700">
@@ -29,25 +52,36 @@ export default function Home() {
       </Link>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-slate-500">구간 선택</h2>
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 text-sm font-semibold dark:bg-slate-800">
+          {(["section", "category"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => choose(v)}
+              aria-pressed={view === v}
+              className={`rounded-lg py-2 ${view === v ? "bg-white shadow-sm dark:bg-slate-700" : "text-slate-500"}`}
+            >
+              {v === "section" ? "구간별" : "주제별"}
+            </button>
+          ))}
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          {Array.from({ length: SECTION_COUNT }, (_, i) => i + 1).map((n) => {
-            const ws = sectionWords(n);
-            const tried = ws.filter((w) => stats[w.id]).length;
-            const t = ws.reduce((s, w) => s + (stats[w.id]?.total ?? 0), 0);
-            const wr = ws.reduce((s, w) => s + (stats[w.id]?.wrong ?? 0), 0);
-            const acc = t ? accuracy({ total: t, wrong: wr, streak: 0, lastWrongAt: 0 }) : null;
-            return (
-              <Link key={n} href={`/study/${n}`} className="card p-3">
-                <p className="font-bold">구간 {n}</p>
-                <p className="text-xs text-slate-500">{ws[0].word} ~ {ws[ws.length - 1].word}</p>
-                <div className="mt-2 h-1.5 overflow-hidden rounded bg-slate-100 dark:bg-slate-700">
-                  <div className="h-full bg-indigo-500" style={{ width: `${(tried / ws.length) * 100}%` }} />
-                </div>
-                <p className="mt-1 text-xs text-slate-500">{tried}/{ws.length}개 학습{acc !== null && ` · 정답률 ${Math.round(acc * 100)}%`}</p>
-              </Link>
-            );
-          })}
+          {view === "section"
+            ? Array.from({ length: SECTION_COUNT }, (_, i) => i + 1).map((n) => (
+                <GroupCard key={n} href={`/study/${n}`} title={`구간 ${n}`} words={sectionWords(n)} stats={stats} />
+              ))
+            : CATEGORIES.map((c) => {
+                const ws = categoryWords(c.slug);
+                return (
+                  <GroupCard
+                    key={c.slug}
+                    href={`/category/${c.slug}`}
+                    title={c.name}
+                    subtitle={ws.slice(0, 3).map((w) => w.word).join(", ") + " …"}
+                    words={ws}
+                    stats={stats}
+                  />
+                );
+              })}
         </div>
       </section>
 
