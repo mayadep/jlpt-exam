@@ -17,7 +17,7 @@ const EXAMPLES = N5_EXAMPLES_RAW.trim()
   .split("\n")
   .map((line) => line.split("|"));
 
-export const SECTION_SIZE = 20;
+export const PART_SIZE = 20; // 한 번에 학습하는 최대 단어 수
 
 // 주제(분류). 단어마다 n5.ts의 네 번째 칸에 이 이름 중 하나가 적혀 있어요
 export const CATEGORIES = [
@@ -58,12 +58,6 @@ if (unknown.length > 0) throw new Error(`주제가 없거나 틀린 단어: ${un
 
 export const WORD_BY_ID = new Map(WORDS.map((w) => [w.id, w]));
 
-export const SECTION_COUNT = Math.ceil(WORDS.length / SECTION_SIZE);
-
-export function sectionWords(section: number): Word[] {
-  return WORDS.slice((section - 1) * SECTION_SIZE, section * SECTION_SIZE);
-}
-
 export function categoryBySlug(slug: string): Category | undefined {
   return CATEGORIES.find((c) => c.slug === slug);
 }
@@ -76,7 +70,7 @@ export function categoryWords(slug: string): Word[] {
 // 단어가 많은 주제는 20개 이하로 고르게 나눠서 학습해요
 export function categoryParts(slug: string): Word[][] {
   const ws = categoryWords(slug);
-  const count = Math.ceil(ws.length / SECTION_SIZE);
+  const count = Math.ceil(ws.length / PART_SIZE);
   return Array.from({ length: count }, (_, i) => ws.slice(Math.round((i * ws.length) / count), Math.round(((i + 1) * ws.length) / count)));
 }
 

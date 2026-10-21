@@ -2,7 +2,7 @@ import Link from "next/link";
 import { accuracy, type StatMap } from "@/lib/progress";
 import type { Word } from "@/lib/words";
 
-// 구간·주제 선택 카드: 학습한 단어 수와 정답률을 보여줘요
+// 주제·묶음 선택 카드: 학습한 단어 수와 정답률을 보여줘요
 export function GroupCard({ href, title, subtitle, words, stats }: { href: string; title: string; subtitle?: string; words: Word[]; stats: StatMap }) {
   const tried = words.filter((w) => stats[w.id]).length;
   const t = words.reduce((s, w) => s + (stats[w.id]?.total ?? 0), 0);

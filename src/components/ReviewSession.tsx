@@ -24,7 +24,7 @@ export function ReviewSession() {
     return (
       <div className="space-y-4 py-16 text-center">
         <p className="text-lg font-semibold">복습할 오답이 없어요 🎉</p>
-        <p className="text-sm text-slate-500">구간 학습에서 문제를 풀고 틀린 단어가 생기면 여기에 모여요.</p>
+        <p className="text-sm text-slate-500">주제별 학습에서 문제를 풀고 틀린 단어가 생기면 여기에 모여요.</p>
         <Link href="/" className="btn-primary inline-block">홈으로</Link>
       </div>
     );
